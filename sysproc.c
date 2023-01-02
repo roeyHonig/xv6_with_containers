@@ -242,6 +242,12 @@ sys_getcpu(void) {
     return id;
 }
 
+int
+sys_cps140(void)
+{
+  return cps140();
+}
+
 // This is our solution for what can be found at the /proc
 // virtual filesystem in linux.
 int

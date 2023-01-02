@@ -489,6 +489,31 @@ wait(int *wstatus)
   }
 }
 
+// current process status
+int
+cps140()
+{
+  struct proc *p;
+  // Enable interrupts on this processor.
+  sti();
+  // Loop over process table looking for process with pid.
+  acquire(&ptable.lock);
+  cprintf("Excuting xv6 system call outlining current process status\n");
+  cprintf("name \t pid \t state \t\t ppid \n");
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    char *processName = p->name;
+    int processId = p->pid;
+    int parentId = (p->parent) ? p->parent->pid : 0; // We set the ppid of the 1st process in user mode, which has no parent, to be 0
+    if (p->state == SLEEPING)
+      cprintf("%s \t %d \t SLEEPING \t %d \n ", processName, processId, parentId);
+    else if (p->state == RUNNING)
+      cprintf("%s \t %d \t RUNNING \t %d \n ", processName, processId, parentId);
+  }
+  release(&ptable.lock);
+  return 140;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
