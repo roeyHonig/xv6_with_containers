@@ -1,0 +1,95 @@
+ioctltests
+tty0 detached 
+
+tty0 connected
+Console connected
+tty0 disconnected 
+tty0 detatched 
+ioctl TESTS PASS:
+cgroupstests
+$ pouch start c1
+[RUNNING] test_mount_cgroup_fs[DONE] test_mount_cgroup_fs   
+[RUNNING] test_creating_cgroups[DONE] test_creating_cgroups   
+[RUNNING] test_opening_and_closing_cgroup_files[DONE] test_opening_and_closing_cgroup_files   
+[RUNNING] test_reading_cgroup_files
+Contents of /cgroup/test1/cgroup.procs: 
+
+Contents of /cgroup/test1/cgroup.controllers: 
+cpu
+pid
+set
+mem
+
+Contents of /cgroup/test1/cgroup.subtree_control: 
+
+Contents of /cgroup/test1/cgroup.events: 
+populated - 0
+frozen - 0
+
+Contents of /cgroup/test1/cgroup.max.descendants: 
+64
+
+Contents of /cgroup/test1/cgroup.max.depth: 
+64
+
+Contents of /cgroup/test1/cgroup.stat: 
+nr_descendants - 0
+nr_dying_descendants - 0
+
+Contents of /cgroup/test1/cpu.max: 
+max - 4294967295
+period - 100000
+
+Contents of /cgroup/test1/cpu.weight: 
+weight - 0
+
+Contents of /cgroup/test1/cpu.stat: 
+usage_usec - 0
+user_usec - 0
+system_usec - 0
+
+Contents of /cgroup/test1/pid.max: 
+max - 64
+
+Contents of /cgroup/test1/pid.current: 
+num_of_procs - 0
+
+Contents of /cgroup/test1/cpuset.cpus: 
+use_cpu - 0
+
+Contents of /cgroup/test1/cgroup.freeze: 
+0
+
+Contents of /cgroup/test1/memory.current: 
+0
+
+Contents of /cgroup/test1/memory.max: 
+2147483648
+
+[DONE] test_reading_cgroup_files
+[RUNNING] test_moving_process[DONE] test_moving_process   
+[RUNNING] test_enable_and_disable_all_controllers[DONE] test_enable_and_disable_all_controllers   
+[RUNNING] test_limiting_pids[DONE] test_limiting_pids   
+[RUNNING] test_move_failure[DONE] test_move_failure   
+[RUNNING] test_fork_failure[DONE] test_fork_failure   
+[RUNNING] test_pid_current[DONE] test_pid_current   
+[RUNNING] test_setting_cpu_id[DONE] test_setting_cpu_id   
+[RUNNING] test_correct_cpu_running[DONE] test_correct_cpu_running   
+[RUNNING] test_no_run[FAILED] test_no_run - expected true for move_proc(TEST_1_CGROUP_PROCS, pidToMove) (cgroupstests.c:670)
+[  FAILED   ]
+$ Pouch: c1 starting
+$ zombie!
+pid
+PID: 2
+$ pouch connect c1
+
+tty0 connected
+pid
+PID: 1
+$ pouch disconnect
+Console connected
+pid
+PID: 2
+$ ls c1
+c1             2 42 23
+$ 

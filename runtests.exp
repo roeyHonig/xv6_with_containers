@@ -1,0 +1,110 @@
+#!/usr/bin/expect -f
+
+#-------------------------------------------------------------------------
+#-HELPER PROCEDURES-------------------------------------------------------
+#-------------------------------------------------------------------------
+
+# - wrapper for checking ps
+# @argv - file name for logging
+# @expect_str - the string to expect
+proc ps_check { argv } {
+
+    set timeout 3
+    set m 0
+    log_file -noappend [lindex $argv 0]
+    expect "$"           
+    send "ps\n"
+    expect "*init * 1 * SLEEPING * 1 * 0"
+    expect "*sh * 2 * SLEEPING * 2 * 1"
+    expect "*ps * 3 * RUNNING * 3 * 2" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+     
+    expect "$" 
+    send "ps\n"
+    expect "*ps * 4 * RUNNING * 4 * 2 * " {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]"; puts "\nTests Failures: $m \n\r" ; exit $m }
+
+    send "\npouch start c1\n"
+    sleep 3
+    send "ps\n"
+    expect "*init * 1 * SLEEPING * 1 * 0"
+    expect "*sh * 2 * SLEEPING * 2 * 1"
+    expect "*sh * 1 * 8 * 7" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+
+    send "\npouch connect c1\n"
+    sleep 3
+    set timeout 3
+    send "ps\n"
+    expect "*init * 1 * SLEEPING * 1 * 0"
+    expect "*sh * 2 * SLEEPING * 2 * 1"
+    expect "*pouch * 7 * 7 * 1" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+    send "ps\n"
+    expect "*sh * 1 * 8 * 7" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+    send "ps\n"
+    expect "*ps * 4 * RUNNING * 14 * 1" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+
+    send "\npouch disconnect\n"
+    sleep 3
+    send "ps\n"
+    expect "*init * 1 * SLEEPING * 1 * 0"
+    expect "*sh * 2 * SLEEPING * 2 * 1"
+    expect "*sh * 1 * 8 * 7" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+
+    send "ps\n"
+    sleep 2
+#    expect "*ps * 18 * RUNNING * 18 * 2" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+    expect {
+            "*ps * 17 * RUNNING * 17 * 2" {}
+            "*ps * 18 * RUNNING * 18 * 2" {puts "\n OK 18 \n\r"}
+            timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+            }
+
+    send "\npouch destroy c1\n"
+    sleep 3
+    send "ps\n"
+    expect "*ps * 2\[1 2] * RUNNING * 2\[1 2] * 2" {} timeout {puts "\n\nTest Failure \n\r"; set m "[expr $m + 1]" }
+     puts "\nTests Failures: $m \n\r"
+
+}
+
+
+#-------------------------------------------------------------------------
+#-TESTS-------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
+# - This test for ps
+# @argv - file name for logging
+proc ps_test {argv} {
+   set running [ps_check $argv ]
+   set timeout 1
+
+}
+
+
+#-------------------------------------------------------------------------
+#-MAIN--------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
+# no limit - usertests are time consuming
+set timeout -1
+
+# dry-run to get qemu command - to end qemu with close afterwards
+#spawn bash -c "make -n qemu-nox | grep qemu"
+#expect eof
+#set qemu_command $expect_out(buffer)
+
+# TODO: use the resut of dry run as an agument fot spawn ($expect_out(buffer) is not working for some reason)
+# actual run
+spawn qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 2 -m 512
+expect "$ "
+
+#uncomment for expect debugging
+#exp_internal 1
+
+#basic tests
+set running [ps_test $argv]
+
+log_file
+# just in case
+close
+
+# jenkins will check if lines=$(grep "ALL TESTS PASSED" mylog.txt | wc -l)
+# -eq 1 (aka SUCCESS, FAILURE otherwise).
