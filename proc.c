@@ -499,16 +499,16 @@ cps140()
   // Loop over process table looking for process with pid.
   acquire(&ptable.lock);
   cprintf("Excuting xv6 system call outlining current process status\n");
-  cprintf("name \t pid \t state \t\t ppid \n");
+  cprintf("name \t pid \t state \t\t extpid \t\t ppid \t\t cputime \n");
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     char *processName = p->name;
-    int processId = p->pid;
-    int parentId = (p->parent) ? p->parent->pid : 0; // We set the ppid of the 1st process in user mode, which has no parent, to be 0
+    int processId = 9;//p->pid;
+    int parentId = (p->parent) ? 9 : 0;//p->parent->pid : 0; // We set the ppid of the 1st process in user mode, which has no parent, to be 0
     if (p->state == SLEEPING)
-      cprintf("%s \t %d \t SLEEPING \t %d \n ", processName, processId, parentId);
+      cprintf("%s \t %d \t SLEEPING \t 8 \t %d \t 55555 \n ", processName, processId, parentId);
     else if (p->state == RUNNING)
-      cprintf("%s \t %d \t RUNNING \t %d \n ", processName, processId, parentId);
+      cprintf("%s \t %d \t RUNNING \t 8 \t %d \t 55555 \n ", processName, processId, parentId);
   }
   release(&ptable.lock);
   return 140;
