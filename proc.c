@@ -498,17 +498,21 @@ cps140()
   sti();
   // Loop over process table looking for process with pid.
   acquire(&ptable.lock);
-  cprintf("Excuting xv6 system call outlining current process status\n");
-  cprintf("name \t pid \t state \t\t extpid \t\t ppid \t\t cputime \n");
+  cprintf("name \t pid \t state \t\t extpid \t ppid \t cputime \n");
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     char *processName = p->name;
-    int processId = 9;//p->pid;
-    int parentId = (p->parent) ? 9 : 0;//p->parent->pid : 0; // We set the ppid of the 1st process in user mode, which has no parent, to be 0
+    int processId = p->pids[0].pid;
+    // Since no nested containers, we set the PPID to be the parent pid in its own namespace. Change this if nested continers enabled!
+    // If no parent, we set the PPID to be 0
+    int parentId = (p->parent) ? p->parent->pids[0].pid : 0;
+    int processCpuTime = p->cpu_time;
+    // Since no nested containers, we only need to check 1 level higher of namespace. Change this if nested continers enabled!
+    int procesExternalPID = p->pids[1].pid == 0 ? p->pids[0].pid : p->pids[1].pid;
     if (p->state == SLEEPING)
-      cprintf("%s \t %d \t SLEEPING \t 8 \t %d \t 55555 \n ", processName, processId, parentId);
+      cprintf("%s \t %d \t SLEEPING \t %d \t\t %d \t %d \n ", processName, processId, procesExternalPID, parentId, processCpuTime);
     else if (p->state == RUNNING)
-      cprintf("%s \t %d \t RUNNING \t 8 \t %d \t 55555 \n ", processName, processId, parentId);
+      cprintf("%s \t %d \t RUNNING \t %d \t\t %d \t %d \n ", processName, processId, procesExternalPID, parentId, processCpuTime);
   }
   release(&ptable.lock);
   return 140;
