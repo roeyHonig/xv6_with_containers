@@ -203,6 +203,7 @@ UPROGS=\
 	_pidns_tests\
 	_wc\
 	_zombie\
+	_ps\
 	_mount\
 	_umount\
 	_timer\
